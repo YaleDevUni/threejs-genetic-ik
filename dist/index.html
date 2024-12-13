@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Three.js Arm with GA</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        display: flex;
+        height: 100vh; /* Ensure body takes full viewport height */
+      }
+      #controlPanel {
+        width: 300px;
+        padding: 20px;
+        background-color: #f0f0f0;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        font-family: Arial, sans-serif;
+        overflow-y: auto; /* Enable vertical scrolling */
+        height: 100vh; /* Make control panel occupy full viewport height */
+      }
+      #container {
+        flex: 1;
+      }
+      .control-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+      }
+      input[type="number"],
+      input[type="range"] {
+        width: 100%;
+        padding: 5px;
+        box-sizing: border-box;
+      }
+      button {
+        width: 100%;
+        padding: 10px;
+        margin-top: 10px;
+        cursor: pointer;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+      }
+      button:disabled {
+        background-color: #a5d6a7;
+        cursor: not-allowed;
+      }
+      #progressContainer {
+        width: 100%;
+        background-color: #ddd;
+        height: 20px;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 10px;
+      }
+      #progressBar {
+        width: 0%;
+        height: 100%;
+        background-color: #4caf50;
+        transition: width 0.2s;
+      }
+      /* Optional: Customize scrollbar for better aesthetics */
+      #controlPanel::-webkit-scrollbar {
+        width: 8px;
+      }
+      #controlPanel::-webkit-scrollbar-track {
+        background: #f0f0f0;
+      }
+      #controlPanel::-webkit-scrollbar-thumb {
+        background-color: #c1c1c1;
+        border-radius: 4px;
+        border: 2px solid #f0f0f0;
+      }
+    </style>
+    <script type="module" crossorigin src="/assets/index-c1ca5ccb.js"></script>
+  </head>
+  <body>
+    <div id="controlPanel">
+      <h2>Control Panel</h2>
+
+      <!-- Arm Position Controls -->
+      <div class="control-group">
+        <h3>Arm Position</h3>
+        <label for="armPosX">X Position:</label>
+        <input type="number" id="armPosX" value="2.6" step="0.1" />
+
+        <label for="armPosY">Y Position:</label>
+        <input type="number" id="armPosY" value="-3.2" step="0.1" />
+
+        <label for="armPosZ">Z Position:</label>
+        <input type="number" id="armPosZ" value="3" step="0.1" />
+      </div>
+
+      <!-- Sine Wave Controls -->
+      <div class="control-group">
+        <h3>Sine Wave</h3>
+        <label for="sineAmplitude">Amplitude:</label>
+        <input type="number" id="sineAmplitude" value="0.5" step="0.1" />
+
+        <label for="sineFrequency">Frequency:</label>
+        <input type="number" id="sineFrequency" value="1" step="0.1" />
+
+        <label for="sinePoints">Number of Points:</label>
+        <input type="number" id="sinePoints" value="50" step="1" />
+      </div>
+
+      <!-- GA Point Configuration -->
+      <div class="control-group">
+        <h3>GA Point Configuration</h3>
+        <label for="gaPoints">Number of Points to Process:</label>
+        <input type="number" id="gaPoints" value="10" step="1" min="1" />
+      </div>
+
+      <!-- Sine Wave Positioning -->
+      <div class="control-group">
+        <h3>Sine Wave Positioning</h3>
+        <label for="sineStartX">Start X Position:</label>
+        <input type="number" id="sineStartX" value="-5" step="0.1" />
+
+        <label for="sineSpacing">Spacing from Arm:</label>
+        <input type="number" id="sineSpacing" value="3" step="0.1" />
+      </div>
+
+      <!-- Genetic Algorithm Controls -->
+      <div class="control-group">
+        <h3>Genetic Algorithm</h3>
+        <label for="populationSize">Population Size:</label>
+        <input type="number" id="populationSize" value="50" step="1" />
+
+        <label for="mutationRate">Mutation Rate:</label>
+        <input
+          type="number"
+          id="mutationRate"
+          value="0.05"
+          step="0.01"
+          min="0"
+          max="1"
+        />
+
+        <label for="crossoverRate">Crossover Rate:</label>
+        <input
+          type="number"
+          id="crossoverRate"
+          value="0.7"
+          step="0.01"
+          min="0"
+          max="1"
+        />
+
+        <label for="maxGenerations">Max Generations:</label>
+        <input type="number" id="maxGenerations" value="100" step="100" />
+
+        <button id="initGAButton">Initialize GA</button>
+        <button id="runSegmentButton" disabled>Run Segment GA</button>
+      </div>
+
+      <!-- Animation Controls -->
+      <div class="control-group">
+        <h3>---</h3>
+        <button id="animateArmButton" disabled>---</button>
+      </div>
+
+      <!-- Progress Bar -->
+      <div id="progressContainer">
+        <div id="progressBar"></div>
+      </div>
+
+      <!-- Status Display -->
+      <div id="status" style="margin-top: 10px; white-space: pre-wrap"></div>
+    </div>
+
+    <div id="container"></div>
+
+    <!-- Include Three.js and other scripts here -->
+    
+  </body>
+</html>

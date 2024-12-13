@@ -125,6 +125,7 @@ function init() {
  * Custom Genetic Algorithm class extending the base GeneticAlgorithm.
  * Overrides the evaluateIndividual method to include deviation penalty.
  */
+
 class CustomGeneticAlgorithm extends GeneticAlgorithm {
   constructor(arm, targetPoint, options = {}) {
     super([arm], options);
@@ -132,7 +133,6 @@ class CustomGeneticAlgorithm extends GeneticAlgorithm {
     this.targetPoint = targetPoint;
   }
   evaluateIndividual(individual) {
-    console.log(this.maxGenerations);
     const angles = individual.chromosome;
     const N_k = 1;
     // console.log(`HHHHHHH${JSON.stringify(this.targetPath, null, 2)}`);
@@ -170,15 +170,15 @@ class CustomGeneticAlgorithm extends GeneticAlgorithm {
       const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
       cumulativeError += dist;
 
-      // Log the positions and distance
-      console.log(`\n--- Evaluating Individual ---`);
-      console.log(
-        `Target Point ${i + 1}: (${targetPos.x}, ${targetPos.y}, ${
-          targetPos.z
-        })`
-      );
-      console.log(`End Effector: (${endPos.x}, ${endPos.y}, ${endPos.z})`);
-      console.log(`Distance: ${dist.toFixed(4)}`);
+      //   // Log the positions and distance
+      //   console.log(`\n--- Evaluating Individual ---`);
+      //   console.log(
+      //     `Target Point ${i + 1}: (${targetPos.x}, ${targetPos.y}, ${
+      //       targetPos.z
+      //     })`
+      //   );
+      //   console.log(`End Effector: (${endPos.x}, ${endPos.y}, ${endPos.z})`);
+      //   console.log(`Distance: ${dist.toFixed(4)}`);
     }
 
     // Deviation penalty based on previous best angles
@@ -192,19 +192,18 @@ class CustomGeneticAlgorithm extends GeneticAlgorithm {
     const totalError = cumulativeError + deviationPenalty;
     individual.fitness = 1 / (1 + totalError);
     // Log total error and fitness
-    console.log(`Total Error: ${totalError}, Fitness: ${individual.fitness}`);
+    // console.log(`Total Error: ${totalError}, Fitness: ${individual.fitness}`);
   }
 }
 
 function onWindowResize() {
-  camera.aspect = (window.innerWidth - 300) / window.innerHeight; 
+  camera.aspect = (window.innerWidth - 300) / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth - 300, window.innerHeight);
   render();
 }
 
-function render() {
-}
+function render() {}
 
 // Initialize GA Button Event Listener
 initGAButton.addEventListener("click", () => {
@@ -236,7 +235,6 @@ async function runGAAsync(gaInstance) {
     iterate();
   });
 }
-
 runSegmentButton.addEventListener("click", async () => {
   const gaPoints = parseInt(gaPointsEl.value, 10) || 10;
 
@@ -248,13 +246,23 @@ runSegmentButton.addEventListener("click", async () => {
   }
 
   runSegmentButton.disabled = true;
-  initGAButton.disabled = true; 
+  initGAButton.disabled = true;
+
+  const totalStartTime = performance.now(); // Record the total start time
 
   for (let i = 0; i < gaPoints; i++) {
     if (currentSegment >= numSegments) {
-      updateStatus("All segments processed.");
+      const totalElapsed = (
+        (performance.now() - totalStartTime) /
+        1000
+      ).toFixed(2);
+      updateStatus(
+        `All segments processed. Total time: ${totalElapsed} seconds.`
+      );
       break;
     }
+
+    const segmentStartTime = performance.now(); // Start time for the current segment
 
     const targetPoint = path[currentSegment];
     updateTargetMarker(targetPoint);
@@ -269,7 +277,7 @@ runSegmentButton.addEventListener("click", async () => {
 
     if (prevBestAngles) {
       if (ga.population.initializeNear) {
-        ga.population.initializeNear(prevBestAngles, 0.1); 
+        ga.population.initializeNear(prevBestAngles, 0.1);
       } else {
         console.warn(
           "initializeNear method is not implemented in the Population class."
@@ -282,11 +290,16 @@ runSegmentButton.addEventListener("click", async () => {
     await runGAAsync(ga);
 
     const best = ga.getBestSolution();
+    const segmentElapsed = (
+      (performance.now() - segmentStartTime) /
+      1000
+    ).toFixed(2);
+
     updateStatus(
       `Point ${currentSegment + 1}/${numSegments} optimized.\n` +
         `Generations: ${generationsRun}\nBest Fitness: ${best.fitness.toFixed(
           4
-        )}`
+        )}\nTime taken: ${segmentElapsed} seconds.`
     );
 
     optimizedAngles.push(best.chromosome);
@@ -299,19 +312,25 @@ runSegmentButton.addEventListener("click", async () => {
   }
 
   if (currentSegment >= numSegments) {
+    const totalElapsed = ((performance.now() - totalStartTime) / 1000).toFixed(
+      2
+    );
     updateStatus(
-      "All segments processed.\nYou can now animate the arm's movement."
+      `All segments processed.\nTotal time: ${totalElapsed} seconds.\nYou can now animate the arm's movement.`
     );
     animateArmButton.disabled = false;
     runSegmentButton.disabled = true;
   } else {
+    const totalElapsed = ((performance.now() - totalStartTime) / 1000).toFixed(
+      2
+    );
     updateStatus(
-      `${gaPoints} points processed.\nClick 'Run Segment GA' to continue.`
+      `${gaPoints} points processed.\nTotal time: ${totalElapsed} seconds.\nClick 'Run Segment GA' to continue.`
     );
     runSegmentButton.disabled = false;
   }
 
-  initGAButton.disabled = false; 
+  initGAButton.disabled = false;
 });
 
 function updateStatus(msg) {
@@ -323,7 +342,7 @@ function animate() {
   requestAnimationFrame(animate);
   controls.update();
   renderer.render(scene, camera);
-  updateEndEffectorMarker(); 
+  updateEndEffectorMarker();
 }
 
 function setupControlPanel() {
@@ -385,7 +404,7 @@ function updateSineWave() {
   sineWave.line.name = "sineWave"; // Assign a name for easy removal
   scene.add(sineWave.line);
 
-  numSegments = path.length; 
+  numSegments = path.length;
 
   updateStatus(
     "Sine wave updated.\nTotal Segments: " +
@@ -398,7 +417,6 @@ function updateSineWavePositioning() {
   updateSineWave();
 }
 
-
 function applyOptimizedAngles(chromosome) {
   const reshapedAngles = [];
   for (let j = 0; j < chromosome.length; j += 3) {
@@ -409,7 +427,6 @@ function applyOptimizedAngles(chromosome) {
   arm.setJointAngles(reshapedAngles);
   arm.getObject3D().updateMatrixWorld(true);
 }
-
 
 function updateTargetMarker(targetPoint) {
   let marker = scene.getObjectByName("targetMarker");
@@ -424,7 +441,6 @@ function updateTargetMarker(targetPoint) {
 
   marker.position.copy(targetPoint);
 }
-
 
 function updateEndEffectorMarker() {
   const endPos = arm.getEndEffectorPosition();
@@ -450,9 +466,9 @@ animateArmButton.addEventListener("click", () => {
     return;
   }
 
-  animateArmButton.disabled = true; 
-  runSegmentButton.disabled = true; 
-  initGAButton.disabled = true; 
+  animateArmButton.disabled = true;
+  runSegmentButton.disabled = true;
+  initGAButton.disabled = true;
 
   let currentAnimationPoint = 0;
 
@@ -476,8 +492,6 @@ animateArmButton.addEventListener("click", () => {
       .flat();
 
     const targetAngles = reshapedAngles.flat();
-
-
   }
 
   animateStep();
